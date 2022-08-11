@@ -31,12 +31,26 @@ var _toObservable = new EnumToObservable();
 //_toObservable.myobservable.SubscribeConsole("get the names");
 // _toObservable.NumbersAndThrow().ToObservable().SubscribeConsole("will_Throw_Error");
 //_toObservable.names.Subscribe(new ConsoleObserver<string>("Subscribe Directly"));
-_toObservable.ConcatMessages();
+// _toObservable.ConcatMessages();
 //_toObservable.ObservableToEnumerable();
 //_toObservable.ObservableToList();
-_toObservable.ObservableToDict();
-_toObservable.ObservableToLookup();
-_toObservable.GenerateNUmbers();
+// _toObservable.ObservableToDict();
+// _toObservable.ObservableToLookup();
+// _toObservable.GenerateNUmbers();
+
+MagicalPrimeGenerator generator = new();
+// foreach(var prime in generator.GeneratePrimesNaive(10)){
+//     // Console.WriteLine("New number ");
+//     Console.Write("{0},",prime);
+// }
+generator.GeneratePrimes(5)
+        .Timestamp()
+        .SubscribeConsole("Prime Generator");
+Console.WriteLine("Generation done");
+
+SearchEngine engine = new();
+engine.search("Observable Search").SubscribeConsole("Start Searching");
+Console.ReadLine();
 
 
 

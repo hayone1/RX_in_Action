@@ -201,3 +201,87 @@ public class MockWPF
 
     
 }
+
+public class MagicalPrimeGenerator
+{
+    private IEnumerable<int> GeneratePrimesNaive(int n)
+    {
+        IList<int> primes = new List<int>();
+        primes.Add(2);
+        yield return 2;
+        int nextPrime = 3;
+        while (primes.Count < n)
+        {
+            int sqrt = (int)Math.Sqrt(nextPrime);
+            bool isPrime = true;
+            for (int i = 0; (int)primes[i] <= sqrt; i++)
+            {
+                if (nextPrime % primes[i] == 0)
+                {
+                    isPrime = false;
+                    break;
+                }
+            }
+            if (isPrime)
+            {
+                primes.Add(nextPrime);
+                yield return nextPrime;
+            }
+            nextPrime += 2;
+        }
+        // return primes;
+    }
+
+    public IObservable<int> GeneratePrimes(int amount)
+    {
+        // return Observable.Create<int>()
+        // var cts = new CancellationTokenSource();
+        return Observable.Create<int>
+        ((O,ct) =>
+            {
+                return Task.Run(() => 
+                {
+                    foreach (var prime in GeneratePrimesNaive(amount))
+                    {
+                        ct.ThrowIfCancellationRequested();
+                        O.OnNext(prime);    
+                    }
+                    O.OnCompleted();
+
+                });
+                // return new CancellationDisposable(cts);
+            }
+        );
+    }
+
+}
+
+class SearchEngine
+{
+    private async Task<IEnumerable<string>> SearchAsync(string term, int delayms)
+    {
+        Console.WriteLine("SearchEngine A/B - "+term);
+
+        await Task.Delay(delayms);//simulate latency
+        return new[] {term, "resultA", "resultB"};
+    }
+
+    public IObservable<string> search(string searchTerm)
+    {
+        return Observable.Create<string>(async (O,ct) =>
+        {
+            var searchA = await SearchAsync("first Search "+searchTerm, 1500);
+            foreach(var result in searchA){
+                ct.ThrowIfCancellationRequested();
+                O.OnNext(result);
+            }
+            ct.ThrowIfCancellationRequested();
+            var searchB = await SearchAsync("second Search "+searchTerm, 900);
+            ct.ThrowIfCancellationRequested();
+            foreach(var result in searchB){
+                O.OnNext(result);
+            }
+            O.OnCompleted();
+        });
+    }
+}
